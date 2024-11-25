@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend-Backend 연동</title>
+</head>
+<body>
+  <h1>데이터 저장 및 조회</h1>
+  <input id="input-data" type="text" placeholder="저장할 데이터를 입력하세요" />
+  <button id="save-btn">저장</button>
+  <button id="load-btn">조회</button>
+
+  <h2>저장된 데이터</h2>
+  <ul id="data-list"></ul>
+
+  <script>
+    const saveButton = document.getElementById('save-btn');
+    const loadButton = document.getElementById('load-btn');
+    const inputData = document.getElementById('input-data');
+    const dataList = document.getElementById('data-list');
+
+    // 데이터 저장
+    saveButton.addEventListener('click', async () => {
+      const value = inputData.value; // 입력 값 가져오기
+      if (!value) {
+        alert('저장할 데이터를 입력하세요!');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value }), // JSON 형태로 전송
+        });
+        const result = await response.json();
+        alert(result.message); // 성공 메시지 표시
+        inputData.value = ''; // 입력 필드 초기화
+      } catch (error) {
+        console.error('데이터 저장 중 오류 발생:', error);
+      }
+    });
+
+    // 데이터 조회
+    loadButton.addEventListener('click', async () => {
+      try {
+        const response = await fetch('http://localhost:3000/data'); // 데이터 조회 요청
+        const result = await response.json();
+        dataList.innerHTML = ''; // 기존 리스트 초기화
+        result.data.forEach((item) => {
+          const li = document.createElement('li');
+          li.textContent = `${item.id}: ${item.value} (저장 시각: ${item.created_at})`;
+          dataList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('데이터 조회 중 오류 발생:', error);
+      }
+    });
+  </script>
+</body>
+</html>
